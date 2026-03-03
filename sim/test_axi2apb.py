@@ -11,6 +11,12 @@ from axi4lite.io import AXI4LiteWriteDataIO
 from axi4lite.io import AXI4LiteWriteResponseIO
 from axi4lite.io import AXI4LiteReadAddressIO
 from axi4lite.io import AXI4LiteReadResponseIO
+from axi4lite.initiator import AXI4LiteReadAddressInitiator
+from axi4lite.target import AXI4LiteReadResponseTarget
+from axi4lite.monitor import AXI4LiteReadResponseMonitor
+from axi4lite.sequences import axi4lite_ar_backpressure
+from axi4lite.sequences import axi4lite_r_backpressure
+from axi4lite.sequences import axi4lite_read_seq
 
 from apb.io import ApbIO
 
@@ -24,6 +30,10 @@ class Axi2ApbTb(BaseBench):
         axi_r_io = AXI4LiteReadResponseIO(dut, "axi", IORole.INITIATOR, io_style=io_suffix_style)
         apb_io = ApbIO(dut, "apb", IORole.INITIATOR, io_style=io_suffix_style)
 
+        self.register("axi_read_req_drv", AXI4LiteReadAddressInitiator(self, axi_ar_io, self.clk, self.rst))
+        self.register("axi_read_rsp_rdy_drv", AXI4LiteReadResponseTarget(self, axi_r_io, self.clk, self.rst))
+        self.register("axi_read_rsp_mon", AXI4LiteReadResponseMonitor(self, axi_r_io, self.clk, self.rst))
+
 
 
 @Axi2ApbTb.testcase(
@@ -36,6 +46,27 @@ class Axi2ApbTb(BaseBench):
 async def smoke(tb: Axi2ApbTb, log):
     log.info(f"Smoke test")
 
+@Axi2ApbTb.testcase(
+    reset_wait_during=2,
+    reset_wait_after=0,
+    timeout=1000,
+    shutdown_delay=1,
+    shutdown_loops=1,
+)
+async def single_read_nobp(tb: Axi2ApbTb, log):
+    log.info(f"Testing a single AXI read transaction.")
+    log.info(f"Scheduling no backpressure on the response driver")
+    tb.schedule(axi4lite_r_backpressure(driver=tb.axi_read_rsp_rdy_drv, backpressure=0.0), blocking=False)
+    log.info(f"Scheduling a read request.")
+    results=[]
+    tb.schedule(
+        axi4lite_read_seq(
+            ar_drv=tb.axi_read_req_drv,
+            r_mon=tb.axi_read_rsp_mon,
+            address=0x42,
+            buffer=results
+        )
+    )
 
 if __name__ == "__main__":
     build_args = ["-Wno-fatal", "--no-stop-fail"]

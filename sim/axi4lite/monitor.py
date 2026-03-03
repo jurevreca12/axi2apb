@@ -18,7 +18,7 @@ class AXI4LiteWriteAddressMonitor(BaseMonitor):
     async def monitor(self, capture):
         while True:
             await RisingEdge(self.clk)
-            if self.rst.value == 1:
+            if self.rst.value == 0:
                 continue
             if self.io.get("awvalid") and self.io.get("awready"):
                 capture(
@@ -34,7 +34,7 @@ class AXI4LiteWriteDataMonitor(BaseMonitor):
     async def monitor(self, capture):
         while True:
             await RisingEdge(self.clk)
-            if self.rst.value == 1:
+            if self.rst.value == 0:
                 continue
             if self.io.get("wvalid") and self.io.get("wready"):
                 capture(
@@ -48,7 +48,7 @@ class AXI4LiteWriteResponseMonitor(BaseMonitor):
     async def monitor(self, capture):
         while True:
             await RisingEdge(self.clk)
-            if self.rst.value == 1:
+            if self.rst.value == 0:
                 continue
             if self.io.get("bvalid") and self.io.get("bready"):
                 capture(
@@ -63,7 +63,7 @@ class AXI4LiteReadAddressMonitor(BaseMonitor):
     async def monitor(self, capture):
         while True:
             await RisingEdge(self.clk)
-            if self.rst.value == 1:
+            if self.rst.value == 0:
                 continue
             if self.io.get("arvalid") and self.io.get("arready"):
                 capture(
@@ -79,7 +79,7 @@ class AXI4LiteReadResponseMonitor(BaseMonitor):
     async def monitor(self, capture):
         while True:
             await RisingEdge(self.clk)
-            if self.rst.value == 1:
+            if self.rst.value == 0:
                 continue
             if self.io.get("rvalid") and self.io.get("rready"):
                 capture(

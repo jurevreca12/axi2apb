@@ -57,7 +57,7 @@ module axi2apb #(
     assign axi_wready_o = '0;
     assign axi_bvalid_o = '0;
     assign axi_bresp_o = '0;
-    assign axi_arready_o = '0;
+    assign axi_arready_o = 1'b1;
     assign axi_rvalid_o = '0;
     assign axi_rdata_o = '0;
     assign axi_rresp_o = '0;

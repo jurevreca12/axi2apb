@@ -24,21 +24,3 @@ def get_rtl_files(lang):
     seen = set()
     rtl_files = [x for x in rtl_files if not (x in seen or seen.add(x))]
     return rtl_files
-
-def get_test_runner(hdl_top):
-    sim = os.getenv("SIM", default="verilator")
-    build_args = ["-Wno-fatal", "--no-stop-fail"]
-    if WAVES:
-        build_args += ["--trace-fst"]
-    if ASSERTIONS:
-        build_args += [f"-DASSERTIONS"]
-    runner = get_runner(sim)
-    runner.build(
-        sources=get_rtl_files(LANGUAGE),
-        includes=["/rvj1/rtl/inc"],
-        build_args=build_args,
-        hdl_toplevel=hdl_top,
-        always=True,
-        waves=False,
-    )
-    return runner
